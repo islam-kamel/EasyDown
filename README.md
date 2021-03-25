@@ -1,2 +1,2 @@
 # Easy Down
-## Developed with python :small_red_triangle_down:
+## Developed with python :arrow_down_small:
