@@ -699,7 +699,7 @@ class MainApp(QMainWindow, FORM_CLASS):
             QMessageBox.warning(self, 'Corrupted Link', 'Verify that you have entered a valid link')
             return
 
-# https://www.youtube.com/watch?v=RhGxcV7akkw
+
 
 
 def main():
