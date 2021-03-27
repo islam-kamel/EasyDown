@@ -6,10 +6,13 @@ from PyQt5.uic import loadUiType
 # Import Os
 from os import path
 import sys
-import urllib.request
+import urllib.request as urreq
 import posixpath
-from urllib.parse import urlparse
+from urllib.parse import urlparse as urlp
 import requests
+import pafy
+import humanize
+import datetime as dt
 
 # Import UI Design
 FORM_CLASS, _ = loadUiType(path.join(path.dirname(__file__), 'main.ui'))
@@ -26,14 +29,26 @@ class MainApp(QMainWindow, FORM_CLASS):
 
     def Handel_Ui(self):
         self.setWindowTitle("Media Down")
-        self.setFixedSize(500, 250)
+        self.setFixedSize(610, 380)
 
     def Handel_Buttons(self):
         self.pushButton_2.clicked.connect(self.Start_Download)
         self.pushButton.clicked.connect(self.Handel_Browse)
+        self.pushButton_7.clicked.connect(self.Get_Tube_Video)
+        self.pushButton_3.clicked.connect(self.Save_browse)
+        self.pushButton_4.clicked.connect(self.Download_Tube_Video)
 
-    def Handel_Browse(self):
+    # Download File Start
+
+    def Handel_Types(self, file_type):
+        """
+        :param file_type:
+        :return:
+        This Is Function Research By
+        File Type From Url In Type Dict
+        """
         types = {
+            'image/svg+xml': '.svg',
             "x-world/x-3dmf": ".3dm",
             "x-world/x-3dmf.copy": ".qd3d",
             "application/octet-stream": ".a",
@@ -557,19 +572,26 @@ class MainApp(QMainWindow, FORM_CLASS):
             "text/x-script.zsh": ".zsh",
 
         }
+        try:
+            return types.get(file_type)
+
+        except Exception:
+            return 'Type Value Error'
+
+    def Handel_Browse(self):
 
         # Check Valid Link
         try:
-            filename = urlparse(self.lineEdit.text()).path  # Get File Name From Url
-            urlpath = requests.get(self.lineEdit.text())    # Url Meta Data
-            file_type = urlpath.headers['Content-Type']     # Get File Type From Url
-
+            filename = urlp(self.lineEdit.text()).path  # Get File Name From Url
+            urlpath = requests.get(self.lineEdit.text())  # Url Meta Data
+            file_type = urlpath.headers['Content-Type']  # Get File Type From Url
+            types = self.Handel_Types(file_type)
             if '.' in filename:  # Check File Name Is Include Type
                 browse_button = QFileDialog.getSaveFileName(self, caption='Save As', directory=f'{filename}',
                                                             filter='All Files (*.*)', )
             else:  # Add File Type
                 browse_button = QFileDialog.getSaveFileName(self, caption='Save As',
-                                                            directory=f'{filename}{types[file_type]}',
+                                                            directory=f'{filename}{types}',
                                                             filter='All Files (*.*)', )
 
             self.lineEdit_2.setText(f'{browse_button[0][:]}')
@@ -592,7 +614,7 @@ class MainApp(QMainWindow, FORM_CLASS):
 
         try:
 
-            urllib.request.urlretrieve(url, save_location, self.Handel_Progress)
+            urreq.urlretrieve(url, save_location, self.Handel_Progress)
 
         except Exception:
 
@@ -604,6 +626,80 @@ class MainApp(QMainWindow, FORM_CLASS):
         self.progressBar.setValue(0)
         self.lineEdit.setText('')
         self.lineEdit_2.setText('')
+
+    # Download File End
+
+    def Get_Tube_Video(self):
+        try:
+            video_url = self.lineEdit_4.text()
+            v = pafy.new(video_url)
+            video_meta = v.allstreams
+
+            for vm in video_meta:
+
+                size = humanize.naturalsize(vm.get_filesize())  # Convert Size KB To MB
+                video_data = f'{vm.mediatype} {vm.extension} {vm.quality} {size}'
+                self.comboBox.addItem(video_data)
+                QApplication.processEvents()
+
+        except ValueError:
+            QMessageBox.warning(self, 'Corrupted Link', 'Verify that you have entered a valid link')
+            return
+
+    def Save_browse(self):
+        self.lineEdit_3.setText(QFileDialog.getExistingDirectory(self))
+
+    def down_rate(self, rate):
+
+        speed = ['Kbs', 'Mbs']
+
+        if rate >= 1024.0:
+
+            return f'{int(rate * 0.0009765625)} {speed[1]}'
+
+        else:
+
+            kbs = int(str(rate * 0.0009765625).split('.')[-1]).__str__()
+            return f'{kbs[:3]} {speed[0]}'
+
+    def Download_Tube_Video(self):
+        try:
+
+            save_location = self.lineEdit_3.text()
+            quality = self.comboBox.currentIndex()
+            video_url = self.lineEdit_4.text()
+
+            v = pafy.new(video_url)
+            vd = v.allstreams
+
+            def progressbar(total, recvd, ratio, rate, eta):
+
+                self.progressBar_2.setValue(int(recvd * 100 / total))
+                speed_method = self.down_rate(rate)
+
+                down_meta = humanize.naturalsize(total, binary=True, gnu=True), speed_method[0], speed_method[
+                    1], humanize.naturaldelta(dt.timedelta(seconds=eta))
+
+                self.lineEdit_7.setText(f'Size = {down_meta[0]} Speed = {speed_method} remaining time: {down_meta[-1]}')
+                QApplication.processEvents()
+
+            if save_location != '':
+
+                vd[quality].download(filepath=save_location, quiet=True, callback=progressbar)
+                self.progressBar_2.setValue(0)
+                self.lineEdit_4.setText('')
+                self.lineEdit_3.setText('')
+                self.comboBox.addItem('')
+            else:
+
+                QMessageBox.warning(self, 'The save path is empty', 'Choose a place to save the video to')
+                return
+
+        except Exception:
+            QMessageBox.warning(self, 'Corrupted Link', 'Verify that you have entered a valid link')
+            return
+
+# https://www.youtube.com/watch?v=RhGxcV7akkw
 
 
 def main():
