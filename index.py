@@ -1,45 +1,73 @@
+"""
+Easy Down Application
+By Islam 2021 open source For Developer
+
+"""
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 # noinspection PyUnresolvedReferences
 from PyQt5.uic import loadUiType
+
 # Import Os
-from os import path
+import os
+
 import sys
+
 import urllib.request as urreq
+
 import posixpath
 from urllib.parse import urlparse as urlp
+
 import requests
 import pafy
 import humanize
 import datetime as dt
 
 # Import UI Design
-FORM_CLASS, _ = loadUiType(path.join(path.dirname(__file__), 'main.ui'))
+FORM_CLASS, _ = loadUiType(os.path.join(os.path.dirname(__file__), 'main.ui'))
 
 
 # Initiate Ui Design
 class MainApp(QMainWindow, FORM_CLASS):
+    """
+    Main App Function
+    And Handel GUI And Button
+    """
+
     def __init__(self, parent=None):
         super(MainApp, self).__init__(parent)
         QMainWindow.__init__(self)
+        pafy.set_api_key('AIzaSyByS0QBxm3r5M8JMy3bYQ3dtPAoOCj-dz0')
         self.setupUi(self)
         self.Handel_Ui()
         self.Handel_Buttons()
 
     def Handel_Ui(self):
+        """
+        Handel App GUI
+        :return:
+        """
+
         self.setWindowTitle("Media Down")
         self.setFixedSize(610, 380)
 
+
     def Handel_Buttons(self):
+        """
+        Handel App Buttons
+        :return:
+        """
         self.pushButton_2.clicked.connect(self.Start_Download)
         self.pushButton.clicked.connect(self.Handel_Browse)
         self.pushButton_7.clicked.connect(self.Get_Tube_Video)
         self.pushButton_3.clicked.connect(self.Save_browse)
         self.pushButton_4.clicked.connect(self.Download_Tube_Video)
+        self.pushButton_6.clicked.connect(self.Save_browse)
+        self.pushButton_5.clicked.connect(self.Download_playlist)
 
     # Download File Start
-
     def Handel_Types(self, file_type):
         """
         :param file_type:
@@ -47,6 +75,7 @@ class MainApp(QMainWindow, FORM_CLASS):
         This Is Function Research By
         File Type From Url In Type Dict
         """
+
         types = {
             'image/svg+xml': '.svg',
             "x-world/x-3dmf": ".3dm",
@@ -579,10 +608,37 @@ class MainApp(QMainWindow, FORM_CLASS):
             return 'Type Value Error'
 
     def Handel_Browse(self):
+        """
+        Handel Select Dir
+        Save Location
+        :return:
+        """
 
         # Check Valid Link
         try:
-            filename = urlp(self.lineEdit.text()).path  # Get File Name From Url
+
+            url = self.lineEdit.text()
+            youtube = 'www.youtube.com'
+            domin = url.split('/')
+
+            # self.tabWidget.currentIndex()  # Return Tab Index
+            if youtube in domin:
+
+                ret = QMessageBox.question(self, 'Is Youtube Link',
+                                           'I discovered this YouTube link Do you want to download the video?',
+                                           QMessageBox.Yes | QMessageBox.No)
+
+                if ret == QMessageBox.Yes:
+
+                    if self.Check_link(url) == 'video':
+                        self.lineEdit_4.setText(url)
+                        self.tabWidget.setCurrentIndex(1)
+                    else:
+                        self.lineEdit_6.setText(url)
+                        self.tabWidget.setCurrentIndex(2)
+                return
+
+            filename = urlp(url).path  # Get File Name From Url
             urlpath = requests.get(self.lineEdit.text())  # Url Meta Data
             file_type = urlpath.headers['Content-Type']  # Get File Type From Url
             types = self.Handel_Types(file_type)
@@ -599,16 +655,11 @@ class MainApp(QMainWindow, FORM_CLASS):
         except Exception:  # Link Error
             QMessageBox.warning(self, 'Corrupted Link', 'Please Make sure you entered a valid link !')
 
-    def Handel_Progress(self, blocknum, blocksize, totalssize):
-
-        read = blocknum * blocksize
-
-        if totalssize > 0:
-            percent = read * 100 / totalssize
-            self.progressBar.setValue(int(percent))
-            QApplication.processEvents()
-
     def Start_Download(self):
+        """
+        Start Download Files From Url.
+        :return:
+        """
         url = self.lineEdit.text()
         save_location = self.lineEdit_2.text()
 
@@ -627,16 +678,44 @@ class MainApp(QMainWindow, FORM_CLASS):
         self.lineEdit.setText('')
         self.lineEdit_2.setText('')
 
+    def Handel_Progress(self, blocknum, blocksize, totalssize):
+        """
+        Handel Progress Bar For Download Files
+        :param blocknum:
+        :param blocksize:
+        :param totalssize:
+        :return:
+        """
+        read = blocknum * blocksize
+
+        if totalssize > 0:
+            percent = read * 100 / totalssize
+            self.progressBar.setValue(int(percent))
+            QApplication.processEvents()
+
     # Download File End
 
+    def Check_link(self, url):
+        urs = url.split('&')
+        if len(urs) != 1:
+            return 'playlist'
+        else:
+            return 'video'
+
+    # Download Video Start
     def Get_Tube_Video(self):
+        """
+        Get Videos Meta From YouTube
+        And Size, Streams
+        :return:
+        """
         try:
+
             video_url = self.lineEdit_4.text()
             v = pafy.new(video_url)
             video_meta = v.allstreams
 
             for vm in video_meta:
-
                 size = humanize.naturalsize(vm.get_filesize())  # Convert Size KB To MB
                 video_data = f'{vm.mediatype} {vm.extension} {vm.quality} {size}'
                 self.comboBox.addItem(video_data)
@@ -647,9 +726,21 @@ class MainApp(QMainWindow, FORM_CLASS):
             return
 
     def Save_browse(self):
-        self.lineEdit_3.setText(QFileDialog.getExistingDirectory(self))
+        """
+        Save Browse For YouTube Videos
+        """
+        if self.sender() is self.pushButton_3:
+
+            self.lineEdit_3.setText(QFileDialog.getExistingDirectory(self))
+
+        else:
+
+            self.lineEdit_5.setText(QFileDialog.getExistingDirectory(self))
 
     def down_rate(self, rate):
+        """
+        Return Download Speed
+        """
 
         speed = ['Kbs', 'Mbs']
 
@@ -662,7 +753,38 @@ class MainApp(QMainWindow, FORM_CLASS):
             kbs = int(str(rate * 0.0009765625).split('.')[-1]).__str__()
             return f'{kbs[:3]} {speed[0]}'
 
+    def progressbar(self, total, recvd, ratio, rate, eta):
+        """
+        progress Bar For Videos Download
+        """
+        if self.sender() is self.pushButton_4:
+
+            self.progressBar_2.setValue(int(recvd * 100 / total))
+            speed_method = self.down_rate(rate)
+
+            down_meta = humanize.naturalsize(total, binary=True, gnu=True), speed_method[0], speed_method[
+                1], humanize.naturaldelta(dt.timedelta(seconds=eta))
+
+            self.lineEdit_7.setText(f'Size = {down_meta[0]} Speed = {speed_method} remaining time: {down_meta[-1]}')
+            QApplication.processEvents()
+
+        else:
+            self.progressBar_3.setValue(int(recvd * 100 / total))
+            speed_method = self.down_rate(rate)
+
+            down_meta = humanize.naturalsize(total, binary=True, gnu=True), speed_method[0], speed_method[
+                1], humanize.naturaldelta(dt.timedelta(seconds=eta))
+
+            self.lineEdit_8.setText(f'Size = {down_meta[0]} Speed = {speed_method} remaining time: {down_meta[-1]}')
+            QApplication.processEvents()
+
     def Download_Tube_Video(self):
+        """
+        Start Download Videos For
+        YouTube.
+        :return:
+        """
+
         try:
 
             save_location = self.lineEdit_3.text()
@@ -672,20 +794,9 @@ class MainApp(QMainWindow, FORM_CLASS):
             v = pafy.new(video_url)
             vd = v.allstreams
 
-            def progressbar(total, recvd, ratio, rate, eta):
-
-                self.progressBar_2.setValue(int(recvd * 100 / total))
-                speed_method = self.down_rate(rate)
-
-                down_meta = humanize.naturalsize(total, binary=True, gnu=True), speed_method[0], speed_method[
-                    1], humanize.naturaldelta(dt.timedelta(seconds=eta))
-
-                self.lineEdit_7.setText(f'Size = {down_meta[0]} Speed = {speed_method} remaining time: {down_meta[-1]}')
-                QApplication.processEvents()
-
             if save_location != '':
 
-                vd[quality].download(filepath=save_location, quiet=True, callback=progressbar)
+                vd[quality].download(filepath=save_location, quiet=True, callback=self.progressbar)
                 self.progressBar_2.setValue(0)
                 self.lineEdit_4.setText('')
                 self.lineEdit_3.setText('')
@@ -699,7 +810,38 @@ class MainApp(QMainWindow, FORM_CLASS):
             QMessageBox.warning(self, 'Corrupted Link', 'Verify that you have entered a valid link')
             return
 
+    def Valid_Name(self, name):
+        fncheck = ['/', '\\', '*', '|', '<', '>', '?', ':']
+        valid = ''
+        for c in name:
+            for v in c:
+                if v not in fncheck[:]:
+                    valid += v
+        return valid
 
+    def Download_playlist(self):
+        try:
+            plurl = self.lineEdit_6.text()
+            playlist = pafy.get_playlist2(plurl)
+
+            os.chdir(self.lineEdit_5.text())
+            if not os.path.exists(self.Valid_Name(playlist.title)):
+                os.mkdir(self.Valid_Name(playlist.title))
+            os.chdir(self.Valid_Name(playlist.title))
+
+            current_v = 0
+
+            for videos in playlist:
+                current_v += 1
+                self.lcdNumber.display(current_v)
+                QApplication.processEvents()
+                videos.getbest(preftype='mp4').download(
+                    filepath=f'{self.lineEdit_5.text()}\\{self.Valid_Name(playlist.title)}',
+                    quiet=True, callback=self.progressbar)
+                QApplication.processEvents()
+        except Exception:
+            QMessageBox.warning(self, 'Corrupted Data', 'Verify that you have entered a valid link Or valid Path')
+            return
 
 
 def main():

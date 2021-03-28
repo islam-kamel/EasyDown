@@ -870,8 +870,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">
-</string>
+       <string notr="true"/>
       </property>
       <property name="text">
        <string>Get Video</string>
@@ -899,7 +898,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
       <property name="geometry">
        <rect>
         <x>140</x>
-        <y>80</y>
+        <y>120</y>
         <width>251</width>
         <height>30</height>
        </rect>
@@ -909,7 +908,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
       <property name="geometry">
        <rect>
         <x>40</x>
-        <y>30</y>
+        <y>70</y>
         <width>81</width>
         <height>30</height>
        </rect>
@@ -929,9 +928,9 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
      <widget class="QPushButton" name="pushButton_5">
       <property name="geometry">
        <rect>
-        <x>390</x>
+        <x>220</x>
         <y>170</y>
-        <width>91</width>
+        <width>261</width>
         <height>30</height>
        </rect>
       </property>
@@ -943,7 +942,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
       <property name="geometry">
        <rect>
         <x>140</x>
-        <y>30</y>
+        <y>70</y>
         <width>341</width>
         <height>30</height>
        </rect>
@@ -953,7 +952,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
       <property name="geometry">
        <rect>
         <x>40</x>
-        <y>80</y>
+        <y>120</y>
         <width>91</width>
         <height>30</height>
        </rect>
@@ -974,7 +973,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
       <property name="geometry">
        <rect>
         <x>400</x>
-        <y>80</y>
+        <y>120</y>
         <width>81</width>
         <height>30</height>
        </rect>
@@ -983,44 +982,13 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
        <string>Browse</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="comboBox_2">
-      <property name="geometry">
-       <rect>
-        <x>140</x>
-        <y>130</y>
-        <width>101</width>
-        <height>21</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_8">
-      <property name="geometry">
-       <rect>
-        <x>40</x>
-        <y>130</y>
-        <width>71</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Qualty</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::RichText</enum>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_9">
       <property name="geometry">
        <rect>
-        <x>270</x>
-        <y>130</y>
+        <x>40</x>
+        <y>170</y>
         <width>91</width>
-        <height>21</height>
+        <height>31</height>
        </rect>
       </property>
       <property name="font">
@@ -1033,6 +1001,60 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
       </property>
       <property name="textFormat">
        <enum>Qt::RichText</enum>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_8">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>30</y>
+        <width>321</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="cursor">
+       <cursorShape>ArrowCursor</cursorShape>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border:none; opactiy:0</string>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QProgressBar" name="progressBar_3">
+      <property name="geometry">
+       <rect>
+        <x>370</x>
+        <y>30</y>
+        <width>111</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="lcdNumber">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>170</y>
+        <width>71</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="lineWidth">
+       <number>-1</number>
+      </property>
+      <property name="value" stdset="0">
+       <double>0.000000000000000</double>
+      </property>
+      <property name="intValue" stdset="0">
+       <number>0</number>
       </property>
      </widget>
     </widget>
